@@ -1,0 +1,7 @@
+{
+    "parameters":{
+        "alpha":  0.3,
+        "beta":   0.4,
+        "gama":   0.3
+    }
+}
