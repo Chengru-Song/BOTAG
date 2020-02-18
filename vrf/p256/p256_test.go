@@ -360,9 +360,16 @@ func h2i(h string) [32]byte {
 
 func TestSaveParams(t *testing.T) {
   t.Log("Testing save params")
-  sk, _ := GenerateKey()
-  err := sk.SaveParams()
-  if err != nil {
-    t.Fatal(err)
+ // sk, _ := GenerateKey()
+ // err := sk.SaveParams()
+ // if err != nil {
+ //   t.Fatal(err)
+ // }
+  key := ReadParams("keys.json")
+  pk := &PublicKey{PublicKey: &key.PublicKey}
+  pi, proof := key.Evaluate([]byte("jason"))
+  index, err := pk.ProofToHash([]byte("jason"), proof)
+  if err != nil || pi != index {
+    t.Fatal(pi, index)
   }
 }

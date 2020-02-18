@@ -267,7 +267,7 @@ type Pk struct {
 }
 // Store json struct
 type Keystore struct {
-  Pubkey ecdsa.PublicKey `json:"public"`
+  Pubkey crypto.PublicKey `json:"public"`
   D *big.Int `json:"D"`
 }
 // Save params save current publickey and privatekey to file
@@ -277,23 +277,34 @@ func (k PrivateKey) SaveParams() error {
     return dirErr
   }
   keyPath := filepath.Join(path, "keys.json")
+  //toSave := Keystore{
+  //  Pubkey: k.PublicKey,
+  //  D: k.D,
+  //}
 
-  file, fileErr := os.Open(keyPath)
-  if fileErr != nil {
-    return fileErr
-  }
-  defer file.Close()
-  toSave := Keystore{
-    Pubkey: k.PublicKey,
-    D: k.D,
-  }
-  fmt.Println(toSave)
-  jsonString, err := json.Marshal(toSave)
+  jsonString, err := json.Marshal(k)
   if err != nil {
     return err
   }
+  fmt.Println("jsonString: ", jsonString)
   saveErr := ioutil.WriteFile(keyPath, jsonString, 0644)
   return saveErr
+}
+
+// ReadParams read parameters from file
+func ReadParams(filename string) PrivateKey {
+  file, fileErr := os.Open(filename)
+  if fileErr != nil {
+    fmt.Println("openfile error: ", fileErr)
+  }
+  defer file.Close()
+  var key PrivateKey
+  byteValue, err := ioutil.ReadAll(file)
+  if err != nil {
+    fmt.Println(err)
+  }
+  json.Unmarshal(byteValue, &key)
+  return key
 }
 
 // NewVRFVerifier creates a verifier object from a public key.
@@ -346,3 +357,4 @@ func NewVRFVerifierFromRawKey(b []byte) (vrf.PublicKey, error) {
 	}
 	return NewVRFVerifier(pk)
 }
+
