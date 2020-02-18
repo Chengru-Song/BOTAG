@@ -1,18 +1,21 @@
 package dns
 
 import (
-	"testing"
+  "testing"
 )
 
-func TestInit(t *testing.T) {
-	t.Log("ReadConfig test")
-	err := ReadConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestReadIdentity(t *testing.T) {
+  sk, pk := readIdentity()
+  pi, proof := sk.Evaluate([]byte("jason"))
+  index, err := pk.ProofToHash([]byte("jason"), proof)
+  if err != nil {
+    t.Fatal(err)
+  } else if pi != index {
+    t.Fatal("error while using vrf")
+  }
 }
 
-func TestCurrentScore(t *testing.T) {
-	t.Log("Testing result")
-	t.Log(currentScore(3.1, 3.4, 5.2))
+func TestVerifiableNumber(t *testing.T) {
+  pi, proof := VerifiableNumber([]byte("jason"))
+  t.Log(pi, proof)
 }

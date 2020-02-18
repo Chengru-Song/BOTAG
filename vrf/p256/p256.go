@@ -222,6 +222,11 @@ func (pk *PublicKey) ProofToHash(m, proof []byte) (index [32]byte, err error) {
 	return sha256.Sum256(vrf), nil
 }
 
+// ToByte returns byte representation of a public key
+func (pk PublicKey) ToByte() ([]byte) {
+  return pk.ToByte()
+}
+
 // NewFromWrappedKey creates a VRF signer object from an encrypted private key.
 // The opaque private key must resolve to an `ecdsa.PrivateKey` in order to work.
 func NewFromWrappedKey(ctx context.Context, wrapped proto.Message) (vrf.PrivateKey, error) {
