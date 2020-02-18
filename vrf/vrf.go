@@ -32,6 +32,8 @@ type PrivateKey interface {
 	// Public returns the corresponding public key.
 	Public() crypto.PublicKey
   Private() crypto.PrivateKey
+  SaveParams() error
+  ReadParams(filename string) crypto.PrivateKey
 }
 
 // PublicKey supports verifying output from the VRF function.

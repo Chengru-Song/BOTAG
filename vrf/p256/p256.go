@@ -36,8 +36,12 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+  "encoding/json"
+  "path/filepath"
+  "os"
+  "io/ioutil"
 
-	"github.com/google/keytransparency/core/crypto/vrf"
+	"github.com/GetALittleRough/BOTAG/vrf"
 	"github.com/google/trillian/crypto/keys"
 
 	"github.com/golang/protobuf/proto"
@@ -254,6 +258,42 @@ func (k PrivateKey) Public() crypto.PublicKey {
 // Private retures the corresponding private key as bytes
 func (k PrivateKey) Private() crypto.PrivateKey {
   return &k.PrivateKey
+}
+
+// Public key and private key struct
+type Pk struct {
+  Curve elliptic.Curve `json:"curve"`
+  X, Y *big.Int `json:"point"`
+}
+// Store json struct
+type Keystore struct {
+  Pubkey ecdsa.PublicKey `json:"public"`
+  D *big.Int `json:"D"`
+}
+// Save params save current publickey and privatekey to file
+func (k PrivateKey) SaveParams() error {
+  path, dirErr := filepath.Abs("./")
+  if dirErr != nil {
+    return dirErr
+  }
+  keyPath := filepath.Join(path, "keys.json")
+
+  file, fileErr := os.Open(keyPath)
+  if fileErr != nil {
+    return fileErr
+  }
+  defer file.Close()
+  toSave := Keystore{
+    Pubkey: k.PublicKey,
+    D: k.D,
+  }
+  fmt.Println(toSave)
+  jsonString, err := json.Marshal(toSave)
+  if err != nil {
+    return err
+  }
+  saveErr := ioutil.WriteFile(keyPath, jsonString, 0644)
+  return saveErr
 }
 
 // NewVRFVerifier creates a verifier object from a public key.

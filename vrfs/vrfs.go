@@ -12,6 +12,7 @@ import (
 func GenerateKey() {
   sk, pk := p256.GenerateKey()
   fmt.Println(sk.Private())
-  fmt.Println(pk)
-
+  fmt.Println(*pk)
+  t := sk.Private()
+  fmt.Println(t)
 }

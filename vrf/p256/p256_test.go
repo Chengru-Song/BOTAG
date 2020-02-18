@@ -357,3 +357,12 @@ func h2i(h string) [32]byte {
 	copy(i[:], b)
 	return i
 }
+
+func TestSaveParams(t *testing.T) {
+  t.Log("Testing save params")
+  sk, _ := GenerateKey()
+  err := sk.SaveParams()
+  if err != nil {
+    t.Fatal(err)
+  }
+}

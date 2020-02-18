@@ -56,6 +56,3 @@ func currentScore(traffic float32, clientScore float32, currentLevel float32) fl
 	return traffic*params.Cfg.Alpha + clientScore*params.Cfg.Beta + currentLevel*params.Cfg.Gama
 }
 
-func main() {
-	fmt.Println(params)
-}
