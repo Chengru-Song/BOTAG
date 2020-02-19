@@ -48,7 +48,6 @@ func ReadConfig() error {
 
 	// Read some configurations from file
 	marshalErr := json.Unmarshal(byteValue, &params)
-	fmt.Println(params)
 	if marshalErr != nil {
 		fmt.Println("json Unmarshal failed")
 		fmt.Println(marshalErr)

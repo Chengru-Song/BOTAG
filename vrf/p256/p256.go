@@ -224,7 +224,6 @@ func (pk *PublicKey) ProofToHash(m, proof []byte) (index [32]byte, err error) {
 
 // ToByte returns byte representation of a public key
 func (pk PublicKey) ToByte() ([]byte) {
-  // return pk.ToByte()
   byteValue, err := json.Marshal(pk)
   if err != nil {
     fmt.Println(err)
@@ -286,7 +285,6 @@ func (k PrivateKey) SaveParams() error {
   if err != nil {
     return err
   }
-  fmt.Println("jsonString: ", jsonString)
   saveErr := ioutil.WriteFile(keyPath, jsonString, 0644)
   return saveErr
 }
