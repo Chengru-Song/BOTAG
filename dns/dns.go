@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+  "bytes"
 
   "github.com/GetALittleRough/BOTAG/vrf/p256"
   "github.com/GetALittleRough/BOTAG/vrf"
@@ -80,9 +81,14 @@ func currentScore(traffic float32, clientScore float32, currentLevel float32) fl
 
 // Verifiable random number generator
 func VerifiableNumber(seed []byte) ([32]byte, []byte) {
-  sk, pk := readIdentity()
-  
-  fmt.Println([]byte())
+  sk, pk := p256.GenerateKey()
+  pkByte := pk.ToByte()
+  var b bytes.Buffer
+  b.Write(seed)
+  b.Write(pkByte)
+
   pi, proof := sk.Evaluate(seed)
+  _, proof2 := sk.Evaluate([]byte("jason"))
+  fmt.Printf("byteLength: %d, keyLength: %d", len(proof), len(proof2))
   return pi, proof
 }

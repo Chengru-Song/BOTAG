@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+  _ "crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"math"
@@ -365,11 +366,19 @@ func TestSaveParams(t *testing.T) {
  // if err != nil {
  //   t.Fatal(err)
  // }
-  key := ReadParams("keys.json")
-  pk := &PublicKey{PublicKey: &key.PublicKey}
-  pi, proof := key.Evaluate([]byte("jason"))
-  index, err := pk.ProofToHash([]byte("jason"), proof)
-  if err != nil || pi != index {
-    t.Fatal(pi, index)
-  }
+  //key := ReadParams("keys.json")
+  //pk := &PublicKey{PublicKey: &key.PublicKey}
+  //pi, proof := key.Evaluate([]byte("jason"))
+  //index, err := pk.ProofToHash([]byte("jason"), proof)
+  //if err != nil || pi != index {
+  //  t.Fatal(pi, index)
+  //}
+}
+
+func TestToByte(t *testing.T) {
+  sk, pk := GenerateKey()
+  pkByte := pk.ToByte()
+  fmt.Println(pk)
+  fmt.Println(sk)
+  fmt.Println("pkbyte: ", pkByte)
 }

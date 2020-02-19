@@ -224,7 +224,12 @@ func (pk *PublicKey) ProofToHash(m, proof []byte) (index [32]byte, err error) {
 
 // ToByte returns byte representation of a public key
 func (pk PublicKey) ToByte() ([]byte) {
-  return pk.ToByte()
+  // return pk.ToByte()
+  byteValue, err := json.Marshal(pk)
+  if err != nil {
+    fmt.Println(err)
+  }
+  return byteValue
 }
 
 // NewFromWrappedKey creates a VRF signer object from an encrypted private key.
@@ -265,16 +270,6 @@ func (k PrivateKey) Private() crypto.PrivateKey {
   return &k.PrivateKey
 }
 
-// Public key and private key struct
-type Pk struct {
-  Curve elliptic.Curve `json:"curve"`
-  X, Y *big.Int `json:"point"`
-}
-// Store json struct
-type Keystore struct {
-  Pubkey crypto.PublicKey `json:"public"`
-  D *big.Int `json:"D"`
-}
 // Save params save current publickey and privatekey to file
 func (k PrivateKey) SaveParams() error {
   path, dirErr := filepath.Abs("./")
