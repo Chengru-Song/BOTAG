@@ -9,7 +9,6 @@ func TestQuickSort(t *testing.T) {
 	s := Server{
 		ID: "json",
 		Clients: []Client{
-
 			Client{
 				ID:           "ou",
 				Score:        10,
@@ -92,11 +91,9 @@ func TestAddClient(t *testing.T) {
 }
 
 func TestBinarySearch(t *testing.T) {
-
 	s := Server{
 		ID: "json",
 		Clients: []Client{
-
 			Client{
 				ID:           "ou",
 				Score:        10,
@@ -139,7 +136,6 @@ func TestCountScore(t *testing.T) {
 	s := Server{
 		ID: "json",
 		Clients: []Client{
-
 			Client{
 				ID:           "ou",
 				Score:        10,

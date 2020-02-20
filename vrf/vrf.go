@@ -33,6 +33,7 @@ type PrivateKey interface {
 	Public() crypto.PublicKey
   Private() crypto.PrivateKey
   SaveParams() error
+  ToByte() []byte
 }
 
 // PublicKey supports verifying output from the VRF function.

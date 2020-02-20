@@ -231,6 +231,14 @@ func (pk PublicKey) ToByte() ([]byte) {
   return byteValue
 }
 
+// ToByte returns byte representation of a private key
+func (sk PrivateKey) ToByte() []byte {
+  byteValue, err := json.Marshal(sk)
+  if err != nil {
+    fmt.Println(err)
+  }
+  return byteValue
+}
 // NewFromWrappedKey creates a VRF signer object from an encrypted private key.
 // The opaque private key must resolve to an `ecdsa.PrivateKey` in order to work.
 func NewFromWrappedKey(ctx context.Context, wrapped proto.Message) (vrf.PrivateKey, error) {
