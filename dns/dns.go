@@ -30,12 +30,13 @@ type Servers struct {
   TotalWeight float64
 }
 
-func (ss *Servers) SumWeight() {
+func (ss *Servers) SumWeight() float64{
   var sum float32
   for _, s := range ss.SS {
     sum += s.Weight
   }
   ss.TotalWeight = float64(sum)
+  return float64(sum)
 }
 
 var params Parameters
@@ -81,8 +82,8 @@ func saveIdentity() error {
 }
 
 // Read configuration file from local
-func readIdentity() (vrf.PrivateKey, vrf.PublicKey) {
-  sk := p256.ReadParams("keys.json")
+func readIdentity(filename string) (vrf.PrivateKey, vrf.PublicKey) {
+  sk := p256.ReadParams(filename)
   return sk, &p256.PublicKey{PublicKey: &sk.PublicKey}
 }
 
@@ -194,4 +195,45 @@ func ReadServers(filename string) (*Servers, error) {
   ss.SS = s
   ss.SumWeight()
   return &ss, nil
+}
+
+// DNSResolve receives all current servers as Servers struct and the corresponding 
+// random number for the current round. DNSResolve verify the random number and
+// select the current server for the requesting client
+// BUG(=======Fri Feb 21 17:41:00 2020 Written by Chengru Song=======) should be
+// aware that json.Unmarshal p256.PublicKey could not unmarshal the Curve pointer
+// therefore created nil pointer in the struct, however the result is not infected
+func DNSResolve(ss *Servers, proofs [][]byte, randoms []int, seed []byte, ms [][32]byte) (int, error) {
+  total := ss.SumWeight()
+  // Checks whether the server correspond to the proofs
+  if len(ss.SS) != len(proofs) || len(ss.SS) != len(randoms) {
+    return 0, errors.New("Wrong bytes or servers received")
+  }
+
+  var max, index int = 0, 0
+  for i, s := range ss.SS {
+    var pk p256.PublicKey
+    //err := json.Unmarshal(s.Pk, &pk)
+    //if err != nil {
+    //  return 0, err
+    //}
+    json.Unmarshal(s.Pk, &pk)
+    m := ms[i]
+    proof := proofs[i]
+    N := total
+    P := float64(s.Weight) / total
+    sj := randoms[i]
+    var pk2 vrf.PublicKey
+    pk2 = &pk
+    verifyErr := VerifyFromProof(m, seed, proof, pk2, N, P, sj)
+    if verifyErr != nil {
+      return 0, verifyErr
+    }
+    if max < randoms[i] {
+      max = randoms[i]
+      index = i
+    }
+  }
+
+  return index, nil
 }

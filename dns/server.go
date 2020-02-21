@@ -2,7 +2,6 @@ package dns
 
 import (
 	_ "fmt"
-  "github.com/GetALittleRough/BOTAG/vrf"
   "github.com/GetALittleRough/BOTAG/vrf/p256"
 )
 
@@ -14,8 +13,8 @@ type Server struct {
 	CurrentLevel   int
 	CurrentTraffic float32
 	Weight         float32
-  Pk             vrf.PublicKey  `json:"Pk"`
-  Sk             vrf.PrivateKey `json:"Sk"`
+  Pk             []byte  `json:"Pk"`
+  Sk             []byte `json:"Sk"`
 }
 
 // Sort client by name
@@ -93,8 +92,9 @@ func (s *Server) CountScore() {
 
 // Get key from p256 
 func (s *Server) GenerateKey() error{
-  s.Sk, s.Pk = p256.GenerateKey()
-  err := s.Sk.SaveParams()
-  return err
+  sk, pk := p256.GenerateKey()
+  s.Pk = pk.ToByte()
+  s.Sk = sk.ToByte()
+  return nil
 }
 

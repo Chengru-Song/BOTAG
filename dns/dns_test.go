@@ -5,25 +5,39 @@ import (
   "math/big"
   "encoding/json"
   "io/ioutil"
+  "os"
 
   "github.com/GetALittleRough/BOTAG/vrf/p256"
   _ "github.com/GetALittleRough/BOTAG/vrf"
 )
 
+func TestSaveIdentity(t *testing.T) {
+  sk, _ := p256.GenerateKey()
+  t.Logf("%s\n", sk.ToByte())
+}
+
 func TestReadIdentity(t *testing.T) {
-  sk, pk := readIdentity()
-  pi, proof := sk.Evaluate([]byte("jason"))
-  index, err := pk.ProofToHash([]byte("jason"), proof)
-  if err != nil {
-    t.Fatal(err)
-  } else if pi != index {
-    t.Fatal("error while using vrf")
+  var key p256.PrivateKey
+  file, fileErr := os.Open("testkeys.json")
+  if fileErr != nil {
+    t.Fatal(fileErr)
   }
+  defer file.Close()
+  jsonString, marshalErr := ioutil.ReadAll(file)
+  if marshalErr != nil {
+    t.Fatal(marshalErr)
+  }
+  unmarshalErr := json.Unmarshal(jsonString, &key)
+  t.Log(key)
+  if unmarshalErr != nil {
+    t.Fatal(unmarshalErr)
+  }
+
 }
 
 func TestHashlen(test *testing.T) {
   test.Log("Test whether hash / Pow(2, hashlen) is different and how it divide")
-  sk, _ := readIdentity()
+  sk, _ := readIdentity("keys.json")
   hash, _ := sk.Evaluate([]byte("jason"))
   t := &big.Int{}
 	t.SetBytes(hash[:])
@@ -45,7 +59,7 @@ func TestHashlen(test *testing.T) {
 }
 
 func TestCrypotographicSortition(t *testing.T) {
-  sk, _ := readIdentity()
+  sk, _ := readIdentity("keys.json")
   slice := []string {
     "jason",
     "jasona",
@@ -62,7 +76,7 @@ func TestCrypotographicSortition(t *testing.T) {
 
 func TestVerifyFromProof(t *testing.T) {
   t.Log("test VerifyFromProof")
-  sk, pk := readIdentity()
+  sk, pk := readIdentity("keys.json")
   slice := []string {
     "jason",
     "jasona",
@@ -146,12 +160,14 @@ func TestReadServer(t *testing.T) {
       },
       CurrentLevel:   10,
       CurrentTraffic: 34.5,
-      Weight:         50.8,
+      Weight:         69.8,
     },
   }
 
   for i, _ := range s {
-    s[i].Sk, s[i].Pk = p256.GenerateKey()
+    sk, pk := p256.GenerateKey()
+    s[i].Sk = sk.ToByte()
+    s[i].Pk = pk.ToByte()
   }
 
   jsonFile, err := json.Marshal(s)
@@ -169,5 +185,42 @@ func TestReadServers(t *testing.T) {
   if err != nil {
     t.Fatal(err)
   }
-  t.Log(s.SS)
+  var sk p256.PrivateKey
+  for _, s := range s.SS {
+    err := json.Unmarshal(s.Sk, &sk)
+    if err != nil {
+      t.Fatal(err)
+    }
+    t.Log(sk.Public())
+  }
+}
+
+func TestDNSResolve(t *testing.T) {
+  ss, err := ReadServers("servers.json")
+  if err != nil {
+    t.Fatal("Cannot read servers")
+  }
+  proofs := make([][]byte, 0)
+  randoms := make([]int, 0)
+  ms := make([][32]byte, 0)
+
+  seed := []byte("jason")
+  for _, s := range ss.SS {
+    var sk p256.PrivateKey
+    json.Unmarshal(s.Sk, &sk)
+    hash, proof := sk.Evaluate(seed)
+    N := ss.SumWeight()
+    P := float64(s.Weight) / N
+    sj := CryptographicSortition(hash, N, P)
+    t.Logf("sj: %d", sj)
+    proofs = append(proofs, proof)
+    ms = append(ms, hash)
+    randoms = append(randoms, sj)
+  }
+
+  index, resolveErr := DNSResolve(ss, proofs, randoms, seed, ms)
+  if resolveErr != nil {
+    t.Fatal(resolveErr)
+  }
+  t.Log(ss.SS[index].ID)
 }
