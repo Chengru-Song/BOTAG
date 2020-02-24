@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"net"
 	"os"
 	"path/filepath"
 
@@ -236,4 +237,20 @@ func DNSResolve(ss *Servers, proofs [][]byte, randoms []int, seed []byte, ms [][
 	}
 
 	return index, nil
+}
+
+// Get public address of this server
+func GetPublicIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+	return "", errors.New("Cannot get public IP")
 }
