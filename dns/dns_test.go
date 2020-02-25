@@ -37,7 +37,7 @@ func TestReadIdentity(t *testing.T) {
 
 func TestHashlen(test *testing.T) {
   test.Log("Test whether hash / Pow(2, hashlen) is different and how it divide")
-  sk, _ := readIdentity("keys.json")
+  sk, _ := ReadIdentity("keys.json")
   hash, _ := sk.Evaluate([]byte("jason"))
   t := &big.Int{}
 	t.SetBytes(hash[:])
@@ -59,7 +59,7 @@ func TestHashlen(test *testing.T) {
 }
 
 func TestCrypotographicSortition(t *testing.T) {
-  sk, _ := readIdentity("keys.json")
+  sk, _ := ReadIdentity("keys.json")
   slice := []string {
     "jason",
     "jasona",
@@ -76,7 +76,7 @@ func TestCrypotographicSortition(t *testing.T) {
 
 func TestVerifyFromProof(t *testing.T) {
   t.Log("test VerifyFromProof")
-  sk, pk := readIdentity("keys.json")
+  sk, pk := ReadIdentity("keys.json")
   slice := []string {
     "jason",
     "jasona",
@@ -223,4 +223,24 @@ func TestDNSResolve(t *testing.T) {
     t.Fatal(resolveErr)
   }
   t.Log(ss.SS[index].ID)
+}
+
+func TestSSWritestruct(t *testing.T) {
+  ss, err := ReadServers("./servers.json")
+  if err != nil {
+    t.Fatal(err)
+  }
+  _, pk := p256.GenerateKey()
+  s := Server {
+    ID: "172.10.19.23",
+    Clients: make([]Client, 0),
+    AvgScore: 0.0,
+    CurrentLevel: 0,
+    CurrentTraffic: 0.0,
+    Weight: 0.0,
+    Pk: pk.ToByte(),
+    Sk: nil,
+  }
+  ss.SS = append(ss.SS, s)
+  ss.WriteStruct("./servers.json")
 }

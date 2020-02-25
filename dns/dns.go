@@ -40,6 +40,15 @@ func (ss *Servers) SumWeight() float64 {
 	return float64(sum)
 }
 
+func (ss *Servers) WriteStruct(filename string) error {
+  jsonFile, err := json.Marshal(ss)
+  if err != nil {
+    return err
+  }
+  saveErr := ioutil.WriteFile(filename, jsonFile, 0644)
+  return saveErr
+}
+
 var params Parameters
 
 func init() {
